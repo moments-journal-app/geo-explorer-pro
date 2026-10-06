@@ -5,15 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Geo-Explorer Pro</title>
     
-    <!-- HOMESCREEN ICON & NATIVE APP SETTINGS -->
     <link rel="icon" type="image/png" href="app-icon.png" />
     <link rel="apple-touch-icon" href="app-icon.png" />
-    
-    <!-- HIDES THE BROWSER BAR ON PHONES -->
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="theme-color" content="#2563eb" />
+
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -67,7 +65,8 @@
         .flashcard-back { background: var(--mint-green); color: var(--text-dark); font-weight: 800; transform: rotateY(180deg); font-size: 1.1em; overflow-y: auto; }
 
         .mcq-question { background: var(--bg-color); padding: 20px; border: 2px dashed var(--text-dark); border-radius: var(--border-radius); margin-bottom: 20px; }
-        .mcq-option { display: block; width: 100%; text-align: left; background: #fff; border: 2px solid var(--text-dark); padding: 12px 15px; margin-top: 10px; border-radius: 8px; font-weight: 700; cursor: pointer; }
+        .mcq-option { display: block; width: 100%; text-align: left; background: #fff; border: 2px solid var(--text-dark); padding: 12px 15px; margin-top: 10px; border-radius: 8px; font-weight: 700; cursor: pointer; transition: 0.1s; }
+        .mcq-option:hover { transform: translateX(5px); }
         .mcq-option.correct { background: var(--mint-green); color: #fff; border-color: var(--mint-green); }
         .mcq-option.wrong { background: var(--danger-red); color: #fff; border-color: var(--danger-red); }
 
@@ -76,8 +75,10 @@
         .drill-badge-fb { background: var(--electric-blue); color: white; padding: 5px 12px; border-radius: 6px; font-size: 0.85em; margin-left: 10px; vertical-align: middle; font-weight: 900; }
         .answer-checker { display: flex; gap: 10px; margin-top: 25px; border-top: var(--border-thick); padding-top: 25px; }
         .answer-input { flex-grow: 1; padding: 15px; font-size: 1.2em; font-weight: 800; border: var(--border-thick); border-radius: 8px; outline: none; }
+        
         .shake { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
         @keyframes shake { 10%, 90% { transform: translate3d(-2px, 0, 0); } 20%, 80% { transform: translate3d(4px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-6px, 0, 0); } 40%, 60% { transform: translate3d(6px, 0, 0); } }
+        
         .hint-btn { background: #e2e8f0; border: 3px solid var(--text-dark); padding: 8px 15px; font-weight: 800; border-radius: 6px; margin: 5px 5px 5px 0; cursor: pointer; box-shadow: 2px 2px 0px var(--text-dark); transition: 0.1s; }
         .hint-btn:active:not(:disabled) { transform: translate(2px,2px); box-shadow: none; }
         .hint-btn:disabled { opacity: 0.5; cursor: not-allowed; }
@@ -94,7 +95,7 @@
         .zoom-wrapper iframe { width: 100%; height: 100%; border: none; }
 
         .trivia-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
-        .history-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; }
+        .history-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; margin-top: 20px; }
         .history-card { background: #fff; border: var(--border-thick); border-color: var(--cyber-yellow); padding: 20px; border-radius: var(--border-radius); cursor: pointer; transition: 0.2s; box-shadow: 4px 4px 0 var(--text-dark); }
         .history-card:hover { transform: translate(2px, 2px); box-shadow: none; }
     </style>
@@ -137,7 +138,8 @@
             </div>
             <nav class="nav-tabs">
                 <button class="tab-btn active" onclick="switchTab('curriculum', this)">📚 Hub</button>
-                <button class="tab-btn" onclick="switchTab('discover', this)">🔍 Discover</button>
+                <button class="tab-btn" onclick="switchTab('discover', this)">🔍 What Others Are Exploring</button>
+                <button class="tab-btn" onclick="switchTab('community_mcq', this)">🏆 Community MCQs</button>
                 <button class="tab-btn" onclick="switchTab('drills', this)">📝 Drills</button>
                 <button class="tab-btn" onclick="switchTab('atlas', this); initLeafletMap();">🗺️ Atlas</button>
                 <button class="tab-btn" onclick="switchTab('trivia', this)">🎯 Trivia</button>
@@ -168,13 +170,24 @@
 
         <div id="discover" class="screen">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <h2 style="color: var(--electric-blue);">👀 Community Knowledge Base</h2>
-                <button class="btn-action" style="padding: 10px 20px; font-size: 1em;" onclick="refreshData()">🔄 Refresh</button>
+                <h2 style="color: var(--electric-blue);">👀 Community Explorations</h2>
+                <button class="btn-action" style="padding: 10px 20px; font-size: 1em;" onclick="refreshData()">🔄 Refresh Data</button>
             </div>
-            <p style="font-weight: 700; margin-bottom: 20px; color: var(--text-muted);">Explore fascinating geography deep-dives and notes recently generated by other explorers!</p>
+            <p style="font-weight: 700; margin-bottom: 15px; color: var(--text-muted);">Search and read fascinating geography deep-dives generated by other explorers.</p>
+            <input type="text" id="historySearchInput" class="search-bar" placeholder="Search past topics..." onkeyup="filterHistory()">
             <div id="historyGrid" class="history-grid"></div>
         </div>
 
+        <!-- NEW COMMUNITY MCQ TAB -->
+        <div id="community_mcq" class="screen">
+            <div class="drill-filters">
+                <input type="text" id="mcqTopicSearch" class="search-bar" style="margin-bottom:0; flex-grow:1; padding: 12px; border: var(--border-thick);" placeholder="Search community MCQs..." onkeyup="filterMCQTopics()">
+                <button class="btn-action" style="background: var(--cyber-yellow); color: var(--text-dark); padding: 12px 20px;" onclick="loadNextMCQ(true)">🎲 Random MCQ</button>
+            </div>
+            <div id="mcqContainer" style="margin-top: 20px;"><div class="card">Loading MCQs...</div></div>
+        </div>
+
+        <!-- STANDARD DRILLS TAB -->
         <div id="drills" class="screen">
             <div class="drill-filters">
                 <input type="text" id="drillTopicSearch" class="search-bar" style="margin-bottom:0; flex-grow:1; padding: 12px; border: var(--border-thick);" placeholder="Search for a specific topic..." onkeyup="filterDrillTopics()">
@@ -228,11 +241,10 @@
         // ==========================================
         // CONFIGURATION - PASTE YOUR GOOGLE APPS SCRIPT URL BELOW
         // ==========================================
-        const GAS_API_URL = "https://script.google.com/macros/s/AKfycbwyqVg_VCae_AYZkHKJII4PxVxVANk1EQnGHRGeWbHFukpcNUKveXWYzsxROY5yigDElw/exec";
+        const GAS_API_URL = "https://script.google.com/macros/s/AKfycbwK3j8-RyhDk82p3TzzWRvTxFATPaOkGlHb5tfyN9k3gH6UsAK3pNZNUS6uevNXBlKIyQ/exec";
 
-        var globalData = { questions: [], facts: [], history: [] };
+        var globalData = { drills: [], mcqs: [], facts: [], history: [] };
         
-        // GAMIFICATION ENGINE
         var GeoGame = {
             user: null, code: null, token: null, xp: 0, streak: 0, rank: "🧭 Tourist",
             
@@ -278,12 +290,12 @@
 
         var sessionInterval = null;
         var currentDrill = null;
+        var currentMCQ = null;
         var hintUsed = false; 
         var currentZoom = 1; 
         var activeZoomWrapperId = 'zoom_mapIndiaPol';
         var currentHistoryView = [];
 
-        // Universal Fetch Wrapper
         async function apiCall(action, params = {}) {
             let url = new URL(GAS_API_URL);
             url.searchParams.append('action', action);
@@ -310,7 +322,6 @@
                 errorEl.innerText = GAS_API_URL.includes("PASTE_YOUR") ? "Developer Error: Update GAS_API_URL in code." : "Please enter both your name and access code.";
                 return;
             }
-            
             errorEl.innerText = "Verifying code...";
             
             apiCall('validateUserCode', { name: name, code: code })
@@ -319,14 +330,11 @@
                         GeoGame.user = data.user;
                         GeoGame.code = data.code;
                         GeoGame.token = data.token;
-                        
                         localStorage.setItem('geo_user', GeoGame.user);
                         localStorage.setItem('geo_code', GeoGame.code);
                         localStorage.setItem('geo_token', GeoGame.token);
-                        
                         document.getElementById('displayUser').innerText = GeoGame.user;
                         document.getElementById('loginOverlay').style.display = 'none';
-                        
                         GeoGame.initProgress(data.progress);
                         sessionInterval = setInterval(pollSessionStatus, 10000);
                         init();
@@ -342,7 +350,7 @@
                 .then(function(data) {
                     if (data && !data.valid) {
                         clearInterval(sessionInterval);
-                        alert("⚠️ Session Terminated: Duplicate login detected from another device or browser tab.");
+                        alert("⚠️ Session Terminated: Duplicate login detected.");
                         localStorage.clear();
                         location.reload();
                     }
@@ -357,30 +365,28 @@
                 GeoGame.user = savedUser;
                 GeoGame.code = savedCode;
                 GeoGame.token = savedToken;
-                
                 document.getElementById('usernameInput').value = GeoGame.user;
                 document.getElementById('accessCodeInput').value = GeoGame.code;
-                
                 startSession();
             }
         });
 
-        function refreshData() {
-            init();
-        }
+        function refreshData() { init(); }
 
         function init() {
             document.getElementById('statusText').innerText = "⏳ Syncing systems...";
             apiCall('getAppData')
                 .then(function(rawData) {
                     if (rawData.success) {
-                        if (rawData.questions) globalData.questions = rawData.questions;
+                        if (rawData.drills) globalData.drills = rawData.drills;
+                        if (rawData.mcqs) globalData.mcqs = rawData.mcqs;
                         if (rawData.facts) globalData.facts = rawData.facts;
                         if (rawData.history) globalData.history = rawData.history;
                         
                         document.getElementById('statusText').innerText = "✅ Systems Online";
                         document.getElementById('statusText').style.color = "var(--mint-green)";
                         loadNextDrill(true);
+                        loadNextMCQ(true);
                         filterTrivia();
                         renderHistory();
                     } else {
@@ -397,21 +403,20 @@
             for (var j = 0; j < buttons.length; j++) { buttons[j].classList.remove('active'); }
             document.getElementById(tabId).classList.add('active');
             if (btnElement) btnElement.classList.add('active');
-            
             if(tabId === 'discover') renderHistory();
         }
 
-        /* DISCOVER / HISTORY VIEW */
+        /* ---------------------------
+           WHAT OTHERS ARE EXPLORING
+        -----------------------------*/
         function renderHistory() {
             var grid = document.getElementById('historyGrid');
             if (!globalData.history || globalData.history.length === 0) {
-                grid.innerHTML = '<div class="card">No search history yet. Be the first to explore the Hub!</div>';
+                grid.innerHTML = '<div class="card">No community explorations yet. Be the first to explore the Hub!</div>';
                 return;
             }
-            
             var html = '';
-            var recent = globalData.history.slice().reverse().slice(0, 30);
-            
+            var recent = globalData.history.slice().reverse(); 
             for (var i = 0; i < recent.length; i++) {
                 var item = recent[i];
                 var q = item.query || 'Exploration';
@@ -425,6 +430,17 @@
             }
             currentHistoryView = recent; 
             grid.innerHTML = html;
+            filterHistory(); 
+        }
+
+        function filterHistory() {
+            var searchTerm = document.getElementById('historySearchInput').value.toLowerCase().trim();
+            var cards = document.querySelectorAll('#historyGrid .history-card');
+            cards.forEach(function(card) {
+                var title = card.querySelector('h3').innerText.toLowerCase();
+                if (title.includes(searchTerm)) card.style.display = 'block';
+                else card.style.display = 'none';
+            });
         }
 
         function viewHistoryItem(index) {
@@ -435,6 +451,9 @@
             document.getElementById('historyModal').style.display = 'flex';
         }
 
+        /* ---------------------------
+           LEAFLET & ATLAS
+        -----------------------------*/
         var leafletMap = null;
         var mapMarker = null;
         function initLeafletMap() {
@@ -493,15 +512,18 @@
             }
         }
 
+        /* ---------------------------
+           HUB & GENERATION
+        -----------------------------*/
         function randomizeTopic() {
-            if (globalData.questions.length === 0) {
+            if (globalData.drills.length === 0) {
                 document.getElementById('currSearch').value = "Dunes";
                 generateTriFactor('standard');
                 return;
             }
             var term = "Volcanoes";
-            for (var i=0; i<globalData.questions.length; i++) {
-                var q = globalData.questions[i];
+            for (var i=0; i<globalData.drills.length; i++) {
+                var q = globalData.drills[i];
                 var answerText = q.answer || q.topic || q.question;
                 if (answerText && answerText.length > 2 && answerText.length < 30) {
                     term = answerText;
@@ -526,6 +548,13 @@
                 .then(function(data) {
                     if (data.success) {
                         renderTriFactorUI(data.markdown, outputDiv, mode);
+                        apiCall('getAppData').then(function(res){
+                            if(res.success) {
+                                globalData.drills = res.drills;
+                                globalData.mcqs = res.mcqs;
+                                globalData.history = res.history;
+                            }
+                        });
                     } else {
                         outputDiv.innerHTML = '<div class="card" style="border-left: 5px solid var(--danger-red);">Error: ' + (data.error || 'Failed') + '</div>';
                     }
@@ -541,9 +570,7 @@
                 if(summaryMatch && summaryMatch[1]) {
                     var fullText = summaryMatch[1].trim();
                     var bulletIdx = fullText.search(/\n\s*[-*]\s/);
-                    var introFluff = "";
-                    var coreNotes = fullText;
-
+                    var introFluff = "", coreNotes = fullText;
                     if (bulletIdx !== -1) {
                         introFluff = fullText.substring(0, bulletIdx).trim();
                         coreNotes = fullText.substring(bulletIdx).trim();
@@ -551,7 +578,6 @@
                         introFluff = fullText.substring(0, fullText.indexOf('.') + 1).trim();
                         coreNotes = fullText.substring(fullText.indexOf('.') + 1).trim();
                     }
-
                     var fluffHtml = introFluff ? '<div class="persona-intro">' + introFluff + '</div>' : '';
                     summaryHTML = '<div class="card"><h2 style="color: var(--electric-blue); margin-bottom:15px;">' + (mode === 'deepdive' ? '🚀 Deep-Dive Exploration' : '📝 Concept Notes') + '</h2>' + fluffHtml + marked.parse(coreNotes) + '</div>';
                 }
@@ -593,15 +619,14 @@
 
                         if(optA && optB) {
                             qListHTML += '<div class="mcq-question"><h3 style="margin-bottom: 15px;">' + (j + 1) + '. ' + qText + '</h3>' +
-                                '<div class="mcq-option" onclick="checkMCQ(this, ' + (correctLetter === 'A') + ')">A) ' + optA + '</div>' +
-                                '<div class="mcq-option" onclick="checkMCQ(this, ' + (correctLetter === 'B') + ')">B) ' + optB + '</div>' +
-                                (optC ? '<div class="mcq-option" onclick="checkMCQ(this, ' + (correctLetter === 'C') + ')">C) ' + optC + '</div>' : '') +
+                                '<button class="mcq-option" onclick="checkStandardMCQ(this, \'' + correctLetter + '\', \'A\')">A) ' + optA + '</button>' +
+                                '<button class="mcq-option" onclick="checkStandardMCQ(this, \'' + correctLetter + '\', \'B\')">B) ' + optB + '</button>' +
+                                (optC ? '<button class="mcq-option" onclick="checkStandardMCQ(this, \'' + correctLetter + '\', \'C\')">C) ' + optC + '</button>' : '') +
                                 '</div>';
                         }
                     }
                     if(qListHTML) quizHTML = '<div class="card" style="border-color: var(--cyber-yellow);"><h2 style="color: var(--cyber-yellow);">⚡ Knowledge Check</h2>' + qListHTML + '</div>';
                 }
-
                 container.innerHTML = summaryHTML + flashcardsHTML + quizHTML + rabbitHTML;
             } catch (err) {
                 container.innerHTML = "<p>Formatting adjusted.</p>" + marked.parse(markdown);
@@ -617,27 +642,107 @@
             return text.substring(startIdx, endIdx).trim();
         }
 
-        function checkMCQ(element, isCorrect) {
-            if(isCorrect) {
+        function checkStandardMCQ(element, correctLetter, guessLetter) {
+            var siblings = element.parentElement.querySelectorAll('.mcq-option');
+            siblings.forEach(s => s.style.pointerEvents = 'none');
+            if(guessLetter === correctLetter) {
                 element.classList.add('correct');
                 GeoGame.addXP(2, element, false);
             } else {
                 element.classList.add('wrong');
+                siblings.forEach(s => { if(s.innerText.startsWith(correctLetter)) s.classList.add('correct'); });
             }
         }
 
+        /* ---------------------------
+           ERROR FLAGGING
+        -----------------------------*/
+        function flagCurrentQuestion(btn, type) {
+            var qText = type === 'mcq' ? (currentMCQ.question || currentMCQ.q) : (currentDrill.question || currentDrill.q);
+            if (!qText) return;
+            btn.innerText = "🚩 Flagged!";
+            btn.disabled = true;
+            apiCall('flagQuestion', { questionText: qText });
+        }
+
+        /* ---------------------------
+           COMMUNITY MCQs TAB
+        -----------------------------*/
+        function filterMCQTopics() { loadNextMCQ(false); }
+
+        function loadNextMCQ(forceRandom = false) {
+            var searchTerm = document.getElementById('mcqTopicSearch') ? document.getElementById('mcqTopicSearch').value.toLowerCase().trim() : '';
+
+            if (globalData.mcqs.length === 0) {
+                 document.getElementById('mcqContainer').innerHTML = '<div class="card">No Community MCQs found yet. Be the first to generate some in the Hub!</div>';
+                 return;
+            }
+
+            var pool = globalData.mcqs.filter(function(q) {
+                var topic = (q.topic || q.query || '').toLowerCase();
+                var question = (q.question || q.q || '').toLowerCase();
+                return searchTerm === '' || topic.includes(searchTerm) || question.includes(searchTerm);
+            });
+
+            var container = document.getElementById('mcqContainer');
+            if (pool.length === 0) {
+                container.innerHTML = '<div class="card">No MCQs match this search.</div>';
+                return;
+            }
+
+            currentMCQ = pool[Math.floor(Math.random() * pool.length)];
+            
+            var questionText = currentMCQ.question || 'MCQ Question';
+            var answerText = String(currentMCQ.correctanswer || 'N/A').trim();
+            var topicText = currentMCQ.topic || currentMCQ.query || 'Community MCQ';
+            
+            var drillBadge = '<span style="background:var(--cyber-yellow); color:var(--text-dark); padding:5px 12px; border-radius:6px; font-size:0.85em; margin-left:10px; font-weight:900;">MULTIPLE CHOICE</span>';
+            var flagHTML = '<button class="hint-btn" style="float: right; color: var(--danger-red); border-color: var(--danger-red); padding: 5px 10px; margin: 0;" onclick="flagCurrentQuestion(this, \'mcq\')">🚩 Flag Error</button>';
+
+            var interactionHTML = '<div style="display:flex; flex-direction:column; gap:10px; margin-top:20px;">' +
+                '<button class="mcq-option" onclick="verifyAutoMCQ(\'A\', this)">A) ' + currentMCQ.optiona + '</button>' +
+                '<button class="mcq-option" onclick="verifyAutoMCQ(\'B\', this)">B) ' + currentMCQ.optionb + '</button>' +
+                (currentMCQ.optionc ? '<button class="mcq-option" onclick="verifyAutoMCQ(\'C\', this)">C) ' + currentMCQ.optionc + '</button>' : '') +
+                '</div>';
+
+            container.innerHTML = '<div class="card">' + flagHTML + '<span style="font-weight: 800; color: var(--electric-blue); text-transform: uppercase;">' + topicText + '</span>' + drillBadge + '<h2 style="margin: 15px 0 25px;">' + questionText + '</h2>' + interactionHTML + '<div id="mcqFeedback" style="margin-top: 15px; font-weight: 800; font-size: 1.2em;"></div><div id="mcqReveal" style="display:none; margin-top: 20px; padding: 20px; background: #d1fae5; border-left: 5px solid var(--mint-green); border-radius: 8px;"><h3 style="color: var(--mint-green); margin-bottom: 10px;">Correct Option: ' + answerText + '</h3><button class="btn-action" style="margin-top: 15px; background: var(--electric-blue);" onclick="loadNextMCQ(true)">Next MCQ ➡</button></div></div>';
+        }
+
+        function verifyAutoMCQ(guessLetter, btnEl) {
+            if (!currentMCQ) return;
+            var correctLetter = String(currentMCQ.correctanswer || '').trim().toUpperCase();
+            var fbEl = document.getElementById('mcqFeedback');
+            
+            var siblings = btnEl.parentElement.querySelectorAll('.mcq-option');
+            siblings.forEach(s => s.style.pointerEvents = 'none');
+
+            if (guessLetter === correctLetter) {
+                btnEl.classList.add('correct');
+                fbEl.innerText = "🎉 Correct!"; fbEl.style.color = "var(--mint-green)";
+                if (document.getElementById('mcqReveal').style.display !== 'block') GeoGame.addXP(15, btnEl, false);
+            } else {
+                btnEl.classList.add('wrong');
+                fbEl.innerText = "❌ Incorrect."; fbEl.style.color = "var(--danger-red)";
+                siblings.forEach(s => { if(s.innerText.startsWith(correctLetter)) s.classList.add('correct'); });
+            }
+            document.getElementById('mcqReveal').style.display = 'block';
+        }
+
+        /* ---------------------------
+           STATIC DRILLS ENGINE
+        -----------------------------*/
         function filterDrillTopics() { loadNextDrill(false); }
 
         function loadNextDrill(forceRandom = false) {
             var searchTerm = document.getElementById('drillTopicSearch') ? document.getElementById('drillTopicSearch').value.toLowerCase().trim() : '';
             hintUsed = false; 
 
-            if (globalData.questions.length === 0) {
+            if (globalData.drills.length === 0) {
                  document.getElementById('drillContainer').innerHTML = '<div class="card">Awaiting Data Sync...</div>';
                  return;
             }
 
-            var pool = globalData.questions.filter(function(q) {
+            var pool = globalData.drills.filter(function(q) {
                 var topic = (q.topic || q.category || '').toLowerCase();
                 var question = (q.question || q.q || '').toLowerCase();
                 return searchTerm === '' || topic.includes(searchTerm) || question.includes(searchTerm);
@@ -665,6 +770,7 @@
             var hint3Text = currentDrill.hint3mask || currentDrill.hint3 || 'No mask available.';
             var explanationText = currentDrill.explanation || '';
 
+            var flagHTML = '<button class="hint-btn" style="float: right; color: var(--danger-red); border-color: var(--danger-red); padding: 5px 10px; margin: 0;" onclick="flagCurrentQuestion(this, \'drill\')">🚩 Flag Error</button>';
             var interactionHTML = '';
             
             if (isTrueFalse) {
@@ -673,7 +779,7 @@
                 interactionHTML = '<div style="margin-bottom: 25px;"><button class="hint-btn" onclick="revealDrillHint(1)">💡 Definition</button><button class="hint-btn" id="hbtn2" disabled onclick="revealDrillHint(2)">🏷 Tags</button><button class="hint-btn" id="hbtn3" disabled onclick="revealDrillHint(3)">🔤 Mask</button><div id="hint1" class="hint-box"><strong>Definition:</strong> ' + hint1Text + '</div><div id="hint2" class="hint-box"><strong>Tags:</strong> ' + hint2Text + '</div><div id="hint3" class="hint-box"><strong>Mask:</strong> <code>' + hint3Text + '</code></div></div><div class="answer-checker"><input type="text" id="drillInput" class="answer-input" placeholder="Type answer..." onkeypress="if(event.key===\'Enter\') verifyDrillAnswer(this)"><button class="btn-action" style="background:var(--mint-green);" onclick="verifyDrillAnswer(this)">Check</button><button class="btn-action" style="background:var(--text-muted);" onclick="forceRevealAnswer()">Reveal</button></div>';
             }
 
-            container.innerHTML = '<div class="card"><span style="font-weight: 800; color: var(--electric-blue); text-transform: uppercase;">' + topicText + '</span>' + drillBadge + '<h2 style="margin: 15px 0 25px;">' + questionText + '</h2>' + interactionHTML + '<div id="drillFeedback" style="margin-top: 15px; font-weight: 800; font-size: 1.2em;"></div><div id="drillReveal" style="display:none; margin-top: 20px; padding: 20px; background: #d1fae5; border-left: 5px solid var(--mint-green); border-radius: 8px;"><h3 style="color: var(--mint-green); margin-bottom: 10px;">Correct Answer: ' + answerText + '</h3><p>' + explanationText + '</p><button class="btn-action" style="margin-top: 15px; background: var(--electric-blue);" onclick="loadNextDrill(true)">Next Drill ➡</button></div></div>';
+            container.innerHTML = '<div class="card">' + flagHTML + '<span style="font-weight: 800; color: var(--electric-blue); text-transform: uppercase;">' + topicText + '</span>' + drillBadge + '<h2 style="margin: 15px 0 25px;">' + questionText + '</h2>' + interactionHTML + '<div id="drillFeedback" style="margin-top: 15px; font-weight: 800; font-size: 1.2em;"></div><div id="drillReveal" style="display:none; margin-top: 20px; padding: 20px; background: #d1fae5; border-left: 5px solid var(--mint-green); border-radius: 8px;"><h3 style="color: var(--mint-green); margin-bottom: 10px;">Correct Answer: ' + answerText + '</h3><p>' + explanationText + '</p><button class="btn-action" style="margin-top: 15px; background: var(--electric-blue);" onclick="loadNextDrill(true)">Next Drill ➡</button></div></div>';
         }
 
         function revealDrillHint(num) {
@@ -695,9 +801,7 @@
             
             if ((isTrue && userGuess === 'true') || (!isTrue && userGuess === 'false')) {
                 fbEl.innerText = "🎉 Correct!"; fbEl.style.color = "var(--mint-green)"; 
-                if (document.getElementById('drillReveal').style.display !== 'block') {
-                    GeoGame.addXP(15, btnEl, true);
-                }
+                if (document.getElementById('drillReveal').style.display !== 'block') { GeoGame.addXP(15, btnEl, true); }
             } else {
                 fbEl.innerText = "❌ Incorrect."; fbEl.style.color = "var(--danger-red)";
             }
@@ -715,10 +819,7 @@
             if (guess === correct || (correct.includes(guess) && guess.length > 3)) {
                 inputEl.style.borderColor = "var(--mint-green)";
                 fbEl.innerText = "🎉 Correct!"; fbEl.style.color = "var(--mint-green)"; 
-                
-                if (document.getElementById('drillReveal').style.display !== 'block') {
-                    GeoGame.addXP(hintUsed ? 5 : 15, btnEl, true);
-                }
+                if (document.getElementById('drillReveal').style.display !== 'block') { GeoGame.addXP(hintUsed ? 5 : 15, btnEl, true); }
                 forceRevealAnswer();
             } else {
                 inputEl.classList.add('shake'); setTimeout(function() { inputEl.classList.remove('shake'); }, 400);
